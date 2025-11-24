@@ -1,0 +1,12 @@
+{
+  "name": "backendproject",
+  "version": "1.0.0",
+  "description": "A YouTube Backend Clone Project",
+  "license": "ISC",
+  "author": "Arun Verma",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
