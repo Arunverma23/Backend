@@ -6,8 +6,6 @@ import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
 
-import { types } from "sass"
-
 const generateAccessAndRefreshTokens = async(userId) => {
     try {
         const user = await User.findById(userId) 
@@ -264,7 +262,12 @@ const changeCurrentUserPassword = asyncHandler(async(req, res) => {
 const getCurrentUser = asyncHandler(async(req, res) => {
     return res
     .status(200)
-    .json(200, req.user), "Current User Fetched Successfully"
+    .json( 
+        new ApiResponse (
+        200,
+        req.user,
+        "Current User Fetched Successfully")
+    )    
 })
 
 const updateAccountDetails = asyncHandler(async(req, res) => {
@@ -274,7 +277,7 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
         throw new ApiError(400, "All fields are required")
     }
 
-    const user = User.findByIdAndDelete(
+    const user = await User.findByIdAndDelete(
         req.user?._id,
         {
             $set: {
@@ -357,10 +360,6 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
         new ApiResponse(200, user, "Cover Image Updated Successfully")
     )
 })
-
-
-
-
 
 export {
     registerUser,
