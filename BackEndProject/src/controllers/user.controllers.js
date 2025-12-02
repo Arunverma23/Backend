@@ -1,4 +1,5 @@
 import { response } from "express"
+import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js"
 import {ApiError} from "../utils/ApiError.js"
 import { User} from "../models/user.model.js"
@@ -163,8 +164,8 @@ const logoutUser = asyncHandler(async(req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
         },
         {
@@ -240,7 +241,7 @@ const changeCurrentUserPassword = asyncHandler(async(req, res) => {
         throw new ApiError(400, "New Password And Confirm Password Doesn't Not Match")
     }
 
-    const user = req.findById(req.user?._id)
+    const user = await User.findById(req.user?._id)
 
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
@@ -277,7 +278,7 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
         throw new ApiError(400, "All fields are required")
     }
 
-    const user = await User.findByIdAndDelete(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -298,7 +299,7 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
 })
 
 const updateUserAvatar = asyncHandler(async(req, res) => {
-    const avatarLocalPath = req.files?.path
+    const avatarLocalPath = req.file?.path;
 
     if(!avatarLocalPath) {
         throw new ApiError(400, "Avatar File is Missing")
@@ -330,7 +331,7 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
 })
 
 const updateUserCoverImage = asyncHandler(async(req, res) => {
-    const coverImageLocalPath = req.files?.path
+    const coverImageLocalPath = req.file?.path
 
     if(!coverImageLocalPath) {
         throw new ApiError(400, "Cover Image File is Missing")
@@ -401,7 +402,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 },
                 isSubscribed: {
                     $cond : {
-                        if: {$in: [req.user?._id, "$subscriber"]},
+                        if: {$in: [req.user?._id, "$subscribers.subscriber"]},
                         then: true,
                         else: false
                     }
@@ -409,7 +410,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             }
         },
         {
-            project: {
+            $project: {
                 fullName: 1,
                 username: 1,
                 subscriberCount: 1,
@@ -487,6 +488,8 @@ const getWatchHistory = asyncHandler (async (req, res) => {
         )
    )
 })
+
+
 
 export {
     registerUser,
